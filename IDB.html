@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+
+<script>
+var idbSupported = false;
+var db;
+
+document.addEventListener("DOMContentLoaded", function(){
+		// check if IDB is supported
+    if("indexedDB" in window) {
+        console.log("IDB capable");
+		idbSupported = true;
+    } else {
+        console.log("IDB error");
+		}
+		// run some tests against the DB
+	if( idbSupported ){
+		var openRequest = indexedDB.open("add_people",1);
+		
+		openRequest.onupgradeneeded = function(e){
+			console.log("Upgrading IDB...");
+			var thisDB = e.target.result;
+			
+			if(!thisDB.objectStoreNames.contains("people")){
+				thisDB.createObjectStore("people",{autoIncrement:true});
+			}
+		}
+		openRequest.onsuccess = function(e){
+			console.log("Success..!");
+			
+			db = e.target.result;
+			// listen for the click from the button
+			document.querySelector("#addButton").addEventListener("click", addPerson,false);
+			document.querySelector("#getButton").addEventListener("click", getPerson,false);
+			document.querySelector("#getAllButton").addEventListener("click", getPeople,false);
+		}
+		openRequest.onerror = function(e){
+			console.log("Error");
+			console.dir(e);
+		}
+	}
+},false);
+
+function addPerson(e){
+	var name = document.querySelector("#name").value;
+	var email = document.querySelector("#email").value;
+	
+	console.log("Preparing to add "+name+"/"+email);
+	// get transaction and ask for the object store
+	var transaction = db.transaction(["people"],"readwrite");
+	var store = transaction.objectStore("people");
+	
+	// the person-record as is stored in JSON
+	var person = {
+		name:name,
+		email:email,
+		created:new Date()
+	}
+	
+	// make the addition
+	var request = store.add(person);
+	
+	request.onerror = function(e){
+		console.log("Error-",e.target.error.name);
+	}
+	request.onsuccess = function(e){
+		console.log("Add successful.");
+	}
+}
+
+function getPerson(e) {
+	var key = document.querySelector("#key").value;
+	var transaction = db.transaction(["people"],"readonly");
+	var store = transaction.objectStore("people");
+	var request = store.get(Number(key));
+
+	request.onsuccess = function(e) {
+		var result = e.target.result;
+		//output result for console and HTML
+		console.log(result);
+		if(result) {
+			var entry = "<h2>Key "+key+"</h2>";
+			for(var field in result) {
+				entry+= field+"="+result[field]+"<br/>";
+			}
+			document.querySelector("#status").innerHTML = entry;
+		} else {
+			document.querySelector("#status").innerHTML = "<h2>No match</h2>";
+		}	
+	}	
+}
+
+function getPeople(e) {
+
+	var entry = "";
+
+	db.transaction(["people"], "readonly").objectStore("people").openCursor().onsuccess = function(e) {
+		var cursor = e.target.result;
+		if(cursor) {
+			entry += "<h2>Key "+cursor.key+"</h2><p>";
+			for(var field in cursor.value) {
+				entry+= field+"="+cursor.value[field]+"<br/>";
+			}
+			entry+="</p>";
+			cursor.continue();
+		}
+		document.querySelector("#status2").innerHTML = entry;
+	}
+}
+
+</script>
+
+	<input type="text" id="name" placeholder="Name"><br />
+	<input type="email" id="email" placeholder="Email"><br />
+	<button id="addButton">Add Contact</button><br />
+	<input type="number" id="key" placeholder="Key"><br/>
+	<button id="getButton">Get Data</button>
+
+	<div id="status"></div>
+	
+	<button id="getAllButton">Get Table</button>
+	
+	<div id="status2"></div>
+</body>
+</html>
