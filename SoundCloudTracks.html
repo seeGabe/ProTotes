@@ -36,23 +36,28 @@
 
     <script>
       SC.initialize({   // register for your SoundCloud keys!!
-        client_id: '##################################'
+        client_id: '################################'
       });
+      
+      var elm = document.getElementById('list');
+
       // query to the tracks
       var runQuery = function(choice){
         SC.get('/tracks', { genres: choice, filter:'downloadable' }, function(tracks) {
           console.log('You just pulled ' +tracks.length+ ' matches.');
-          console.log(tracks[0])
-          var tracklist=[];
-          var elm = document.getElementById('list');
+          console.log(tracks[0]);
+
+          var tracklist='';
           for (var i = 0; i < tracks.length; i++) {
-            
-            tracklist += '<li class="list-group-item"><a href="' +tracks[i].permalink_url+ '">' +tracks[i].user.username+ '&nbsp;-&nbsp;' +tracks[i].title+ '</a><span class="badge"><a href="' +tracks[i].download_url+ '">-DL-</a></span></li>';
+            tracklist += '<li class="list-group-item"><a href="' +tracks[i].permalink_url+ '">' +tracks[i].user.username+ '&nbsp;-&nbsp;' +tracks[i].title+ '</a>';
+            if (tracks[i].download_url) {
+             tracklist += '<a href="' +tracks[i].download_url+ '" class="dload"><span class="badge pull-right">-DL-</span></a>';
+            };
+            tracklist+='</li>';
           };
           elm.innerHTML= tracklist;
         });
       };
-
 
     </script>
   </body>
