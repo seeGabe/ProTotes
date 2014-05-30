@@ -50,7 +50,7 @@
           var tracklist='';
           for (var i = 0; i < tracks.length; i++) {
             tracklist += '<li class="list-group-item"><a href="' +tracks[i].permalink_url+ '">' +tracks[i].user.username+ '&nbsp;-&nbsp;' +tracks[i].title+ '</a>' +(tracks[i].download_url ? '<a href="' +tracks[i].download_url+ '" class="dload"><span class="badge pull-right">-DL-</span></a></li>' : '</li>');
-          };
+          }
           elm.innerHTML= tracklist;
         });
       };

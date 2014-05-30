@@ -58,17 +58,17 @@ function addPerson(e){
 		name:name,
 		email:email,
 		created:new Date()
-	}
+	};
 	
 	// make the addition
 	var request = store.add(person);
 	
 	request.onerror = function(e){
 		console.log("Error-",e.target.error.name);
-	}
+	};
 	request.onsuccess = function(e){
 		console.log("Add successful.");
-	}
+	};
 }
 
 function getPerson(e) {
